@@ -2,115 +2,105 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
-    <title>Google Form dengan Lokasi Otomatis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Lokasi</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-
         body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #8A0604, #D5A84D);
             color: white;
             text-align: center;
-            overflow: hidden;
+            padding: 0;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        #loading, #error {
-            font-size: 20px;
-            font-weight: bold;
+        .container {
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.7);
             padding: 20px;
-            background: rgba(0, 0, 0, 0.2);
             border-radius: 10px;
-            display: block;
         }
-
-        #retryButton {
-            margin-top: 15px;
+        button {
+            background: #D5A84D;
+            color: #8A0604;
+            border: none;
             padding: 10px 20px;
             font-size: 16px;
-            font-weight: bold;
-            color: white;
-            background: #ff4b5c;
-            border: none;
-            border-radius: 5px;
             cursor: pointer;
-            display: none; /* Tersembunyi sebelum error */
+            border-radius: 5px;
         }
-
+        button:hover {
+            background: #8A0604;
+            color: white;
+        }
         iframe {
-            display: none; /* Disembunyikan sebelum lokasi didapat */
+            display: none;
             width: 100vw;
             height: 100vh;
             border: none;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
     </style>
 </head>
 <body>
-    <div id="loading">Mendeteksi lokasi Anda...</div>
-    <div id="error" style="display: none;"></div>
-    <button id="retryButton" onclick="getLocation()">Coba Lagi</button>
-
+    <div class="container" id="content">
+        <h1>Form Lokasi</h1>
+        <p>Klik tombol di bawah ini untuk mengecek lokasi Anda:</p>
+        <button id="locateButton" onclick="getLocation()">Cek Lokasi</button>
+        <p id="status"></p>
+    </div>
     <iframe id="googleForm" src=""></iframe>
-
     <script>
         function getLocation() {
-            document.getElementById("loading").style.display = "block";
-            document.getElementById("error").style.display = "none";
-            document.getElementById("retryButton").style.display = "none";
-
+            document.getElementById("status").innerHTML = "Mendeteksi lokasi Anda...";
+            document.getElementById("locateButton").style.display = "none";
+            
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        let latitude = position.coords.latitude;
-                        let longitude = position.coords.longitude;
-
-                        // Gantilah FORM_ID dan ENTRY_ID sesuai dengan Google Form Anda
-                        let formBaseURL = "https://docs.google.com/forms/d/e/1FAIpQLScWDo43M1pP6-yWs2qxs3uWTDHj49-yWbLL8USuU8zTY7K3pw/viewform?usp=pp_url";
-                        let locationParam = "&entry.1591532699=" + latitude + "," + longitude;
-
-                        // Setel iframe src untuk menampilkan form dengan lokasi terisi
-                        let iframe = document.getElementById("googleForm");
-                        iframe.src = formBaseURL + locationParam;
-
-                        // Sembunyikan teks loading dan tampilkan form
-                        document.getElementById("loading").style.display = "none";
-                        iframe.style.display = "block";
-                    },
-                    function(error) {
-                        let errorMessage = "Gagal mendapatkan lokasi.";
-                        if (error.code === error.PERMISSION_DENIED) {
-                            errorMessage = "Anda menolak akses lokasi. Silakan izinkan akses lokasi dan coba lagi.";
-                        } else if (error.code === error.POSITION_UNAVAILABLE) {
-                            errorMessage = "Lokasi tidak tersedia. Pastikan GPS Anda aktif.";
-                        } else if (error.code === error.TIMEOUT) {
-                            errorMessage = "Permintaan lokasi terlalu lama. Coba lagi.";
-                        }
-
-                        document.getElementById("loading").style.display = "none";
-                        document.getElementById("error").innerText = errorMessage;
-                        document.getElementById("error").style.display = "block";
-                        document.getElementById("retryButton").style.display = "inline-block";
-                    }
-                );
+                navigator.geolocation.getCurrentPosition(showPosition, showError, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
             } else {
-                document.getElementById("loading").style.display = "none";
-                document.getElementById("error").innerText = "Geolocation tidak didukung oleh browser ini.";
-                document.getElementById("error").style.display = "block";
-                document.getElementById("retryButton").style.display = "inline-block";
+                document.getElementById("status").innerHTML = "Geolokasi tidak didukung oleh browser Anda.";
+                document.getElementById("locateButton").style.display = "block";
             }
         }
-
-        // Panggil fungsi saat halaman dimuat
-        window.onload = getLocation;
+        
+        function showPosition(position) {
+            let latitude = position.coords.latitude;
+            let longitude = position.coords.longitude;
+            
+            let formBaseURL = "https://docs.google.com/forms/d/e/1FAIpQLScWDo43M1pP6-yWs2qxs3uWTDHj49-yWbLL8USuU8zTY7K3pw/viewform?usp=pp_url";
+            let locationParam = "&entry.1591532699=" + latitude + "," + longitude;
+            
+            let iframe = document.getElementById("googleForm");
+            iframe.src = formBaseURL + locationParam;
+            iframe.style.display = "block";
+            
+            document.getElementById("content").style.display = "none";
+        }
+        
+        function showError(error) {
+            let errorMessage = "Terjadi kesalahan saat mengambil lokasi.";
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage = "Anda menolak permintaan lokasi. Silakan izinkan akses lokasi dan coba lagi.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage = "Informasi lokasi tidak tersedia.";
+                    break;
+                case error.TIMEOUT:
+                    errorMessage = "Permintaan lokasi melebihi waktu yang ditentukan.";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    errorMessage = "Terjadi kesalahan yang tidak diketahui.";
+                    break;
+            }
+            document.getElementById("status").innerHTML = errorMessage;
+            document.getElementById("locateButton").style.display = "block";
+        }
     </script>
 </body>
 </html>
