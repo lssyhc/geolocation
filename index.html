@@ -2,14 +2,49 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
     <title>Google Form dengan Lokasi Otomatis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        #loading {
+            font-size: 20px;
+            font-weight: bold;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            display: block;
+        }
+
+        iframe {
+            display: none; /* Disembunyikan sebelum lokasi didapat */
+            width: 100vw;
+            height: 100vh;
+            border: none;
+        }
+    </style>
 </head>
 <body>
-    <h2>Silakan isi formulir berikut</h2>
-    <p>Mendeteksi lokasi Anda...</p>
+    <div id="loading">Mendeteksi lokasi Anda...</div>
 
-    <iframe id="googleForm" src="" width="100%" height="100%" frameborder="0"></iframe>
+    <iframe id="googleForm" src=""></iframe>
 
     <script>
         function getLocation() {
@@ -18,17 +53,22 @@
                     let latitude = position.coords.latitude;
                     let longitude = position.coords.longitude;
 
-                    // Gantilah FORM_ID dan ENTRY_ID sesuai dengan form Anda
+                    // Gantilah FORM_ID dan ENTRY_ID sesuai dengan Google Form Anda
                     let formBaseURL = "https://docs.google.com/forms/d/e/1FAIpQLScWDo43M1pP6-yWs2qxs3uWTDHj49-yWbLL8USuU8zTY7K3pw/viewform?usp=pp_url";
                     let locationParam = "&entry.1591532699=" + latitude + "," + longitude;
 
                     // Setel iframe src untuk menampilkan form dengan lokasi terisi
-                    document.getElementById("googleForm").src = formBaseURL + locationParam;
+                    let iframe = document.getElementById("googleForm");
+                    iframe.src = formBaseURL + locationParam;
+
+                    // Sembunyikan teks loading dan tampilkan form
+                    document.getElementById("loading").style.display = "none";
+                    iframe.style.display = "block";
                 }, function(error) {
-                    alert("Gagal mendapatkan lokasi: " + error.message);
+                    document.getElementById("loading").innerText = "Gagal mendapatkan lokasi: " + error.message;
                 });
             } else {
-                alert("Geolocation tidak didukung di browser ini.");
+                document.getElementById("loading").innerText = "Geolocation tidak didukung oleh browser ini.";
             }
         }
 
