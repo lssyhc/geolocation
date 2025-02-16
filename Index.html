@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Form dengan Lokasi Otomatis</title>
+</head>
+<body>
+    <h2>Silakan isi formulir berikut</h2>
+    <p>Mendeteksi lokasi Anda...</p>
+
+    <iframe id="googleForm" src="" width="100%" height="600px" frameborder="0"></iframe>
+
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    let latitude = position.coords.latitude;
+                    let longitude = position.coords.longitude;
+
+                    // Gantilah FORM_ID dan ENTRY_ID sesuai dengan form Anda
+                    let formBaseURL = "https://docs.google.com/forms/d/e/1FAIpQLScWDo43M1pP6-yWs2qxs3uWTDHj49-yWbLL8USuU8zTY7K3pw/viewform?usp=pp_url";
+                    let locationParam = "&entry.1591532699=" + latitude + "," + longitude;
+
+                    // Setel iframe src untuk menampilkan form dengan lokasi terisi
+                    document.getElementById("googleForm").src = formBaseURL + locationParam;
+                }, function(error) {
+                    alert("Gagal mendapatkan lokasi: " + error.message);
+                });
+            } else {
+                alert("Geolocation tidak didukung di browser ini.");
+            }
+        }
+
+        // Panggil fungsi saat halaman dimuat
+        window.onload = getLocation;
+    </script>
+</body>
+</html>
